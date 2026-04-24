@@ -1,47 +1,71 @@
-.hero {
+html{
+  min-height: 100%;
+}
+body {
+  font-family: 'Roboto', sans-serif;
+  font-size: 100%;
+  font-size: 16px;
+  font-size: 1em;
+  margin: 0px;
+  padding: 0px;
+  height:100%;
+}
+
+header {
+  position: fixed;
+  top:0px;
+  width:100%;
   display: flex;
-  width: 100vw;
-  height: 90vh;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
   background-color: @primary_bg;
   color: @primary_text;
+  padding: 0px;
+  flex-wrap: wrap;
+  z-index:1001;
+}
+
+header h1 {
+  margin: 0px;
+  padding: 0.75rem 1rem;
+  font-size: 1.5rem;
+}
+
+main {
   position: relative;
-
-  img {
-    width: 100%;
-    padding: 0px;
-    margin: 0px;
-    object-fit: cover;
-  }
+  margin-top: 52px;
+  padding: 1em;
+  min-height: ~"calc(100vh - 102px)";
 }
 
-.herocontainer {
-  margin-left: -1rem;
-  margin-top: -1rem;
-}
-
-.action {
-  position: absolute;
-  left: 0;
-  bottom: 2rem;
-  box-sizing: border-box;
+footer {
+  background-color: @primary_bg;
+  color: @primary_text;
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 2rem;
-  background-color: @primary_bg;
-  color: @primary_text;
-  width:100%;
+  padding: 1rem;
+  z-index: 1010;
 }
 
-@media @md {
-  .hero {
-    height: 640px;
+header .username{
+  margin-left:auto;
+  margin-right:1rem;
+}
+header .username a{
+  text-decoration: none;
+  color: @primary_text;
+  margin-left: 0.25rem;
+}
+
+
+@media @lg {
+  header {
+    flex-direction: row;
   }
-  .action {
-      left: ~"calc(75% - 160px)";
-      top: ~"calc(75% - 160px)";
-      bottom: initial;
-      width: 320px;
-    }
+
+  main {
+    min-height: ~"calc(100vh - 102px)";
   }
+}

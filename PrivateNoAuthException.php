@@ -1,21 +1,57 @@
 <?php
+/**
+ * PHP Version 7.2
+ * Checkout
+ *
+ * @category Controller
+ * @package  Controllers\Checkout
+ * @author   Orlando J Betancourth <orlando.betancourth@gmail.com>
+ * @license  Comercial http://
+ * @version  CVS:1.0.0
+ * @link     http://url.com
+ */
+ namespace Controllers\Checkout;
 
-namespace Controllers\Checkout;
+// ---------------------------------------------------------------
+// Sección de imports
+// ---------------------------------------------------------------
+use Controllers\PrivateController;
 
-use Controllers\PublicController;
-class Accept extends PublicController{
+/**
+ * Catalogo
+ *
+ * @category Public
+ * @package  Controllers\Checkout;
+ * @author   Orlando J Betancourth <orlando.betancourth@gmail.com>
+ * @license  MIT http://
+ * @link     http://
+ */
+class Catalogo extends PrivateController
+{
+    /**
+     * Runs the controller
+     *
+     * @return void
+     */
     public function run():void
     {
-        $dataview = array();
-        $token = $_GET["token"] ?: "";
-        $session_token = $_SESSION["orderid"] ?: "";
-        if ($token !== "" && $token == $session_token) {
-            $result = \Utilities\Paypal\PayPalCapture::captureOrder($session_token);
-            $dataview["orderjson"] = json_encode($result, JSON_PRETTY_PRINT);
-        } else {
-            $dataview["orderjson"] = "No Order Available!!!";
+        // code
+        $producto = \Dao\Productos::getAll();
+        $carretilla = \Dao\Carretilla::getAll(\Utilities\Security::getUserId());
+
+        $carrAssoc = array();
+        foreach($carretilla as $carr) {
+            $carrAssoc[$carr["prdcod"]] = $carr;
         }
-        \Views\Renderer::render("paypal/accept", $dataview);
+
+        foreach($producto as $prod) {
+            if (isset($carrAssoc[$prod["prdcod"]])) {
+                $prod["enCarretilla"] = true;
+            } else {
+                $prod["enCarretilla"] = false;
+            }
+        }
+        \Views\Renderer::render("abc", array("productos" => $producto));
     }
 }
 

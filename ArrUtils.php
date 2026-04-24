@@ -2,7 +2,7 @@
 namespace Controllers;
 use Exception;
 
-class PrivateNoAuthException extends Exception
+class PrivateNoLoggedException extends Exception
 {
 
 }

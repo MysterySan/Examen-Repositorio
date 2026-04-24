@@ -1,33 +1,23 @@
 <?php
+namespace Controllers;
 
-namespace Controllers\Mantenimientos\Encuestas;
-
-use Controllers\PublicController;
-use Views\Renderer;
-use Dao\Mantenimientos\Encuestas as EncuestasDAO;
-
-const LIST_VIEW_TEMPLATE = "mantenimientos/encuestas/listado";
-
-class Listado extends PublicController
+class NoAuth extends PublicController
 {
-
-    private array $encuestasList = [];
-
-    public function run(): void
+    public function run() :void
     {
-        $this->encuestasList = EncuestasDAO::getAllEncuestas();
-
-        Renderer::render(
-            LIST_VIEW_TEMPLATE,
-            $this->prepareViewData()
-        );
-    }
-
-    private function prepareViewData()
-    {
-        return [
-            "encuestas" => $this->encuestasList
-        ];
+        if (\Utilities\Security::isLogged()){
+            if (\Utilities\Context::getContextByKey("PRIVATE_LAYOUT") !== "") {
+                \Views\Renderer::render(
+                    "noauth",
+                    array(),
+                    \Utilities\Context::getContextByKey("PRIVATE_LAYOUT")
+                );
+            } else {
+                \Views\Renderer::render("noauth", array());
+            }
+        } else {
+            \Views\Renderer::render("noauth", array());
+        }
     }
 }
-
+?>

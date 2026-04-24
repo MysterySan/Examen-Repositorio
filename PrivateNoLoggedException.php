@@ -1,58 +1,28 @@
 <?php
-/**
- * PHP Version 7.2
- * Checkout
- *
- * @category Controller
- * @package  Controllers\Checkout
- * @author   Orlando J Betancourth <orlando.betancourth@gmail.com>
- * @license  Comercial http://
- * @version  CVS:1.0.0
- * @link     http://url.com
- */
- namespace Controllers\Checkout;
 
-// ---------------------------------------------------------------
-// Sección de imports
-// ---------------------------------------------------------------
-use Controllers\PrivateController;
+namespace Controllers\Checkout;
 
-/**
- * Catalogo
- *
- * @category Public
- * @package  Controllers\Checkout;
- * @author   Orlando J Betancourth <orlando.betancourth@gmail.com>
- * @license  MIT http://
- * @link     http://
- */
-class Catalogo extends PrivateController
-{
-    /**
-     * Runs the controller
-     *
-     * @return void
-     */
+use Controllers\PublicController;
+
+class Checkout extends PublicController{
     public function run():void
     {
-        // code
-        $producto = \Dao\Productos::getAll();
-        $carretilla = \Dao\Carretilla::getAll(\Utilities\Security::getUserId());
-
-        $carrAssoc = array();
-        foreach($carretilla as $carr) {
-            $carrAssoc[$carr["prdcod"]] = $carr;
+        $viewData = array();
+        if ($this->isPostBack()) {
+            $PayPalOrder = new \Utilities\Paypal\PayPalOrder(
+                "test".(time() - 10000000),
+                "http://localhost/mvco/index.php?page=checkout_error",
+                "http://localhost/mvco/index.php?page=checkout_accept"
+            );
+            $PayPalOrder->addItem("Test", "TestItem1", "PRD1", 100, 15, 1, "DIGITAL_GOODS");
+            $PayPalOrder->addItem("Test 2", "TestItem2", "PRD2", 50, 7.5, 2, "DIGITAL_GOODS");
+            $response = $PayPalOrder->createOrder();
+            $_SESSION["orderid"] = $response[1]->result->id;
+            \Utilities\Site::redirectTo($response[0]->href);
+            die();
         }
 
-        foreach($producto as $prod) {
-            if (isset($carrAssoc[$prod["prdcod"]])) {
-                $prod["enCarretilla"] = true;
-            } else {
-                $prod["enCarretilla"] = false;
-            }
-        }
-        \Views\Renderer::render("abc", array("productos" => $producto));
+        \Views\Renderer::render("paypal/checkout", $viewData);
     }
 }
-
 ?>

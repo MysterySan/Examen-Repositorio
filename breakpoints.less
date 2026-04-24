@@ -1,18 +1,37 @@
-:root{
-  --primary_text: #fff;
-  --primary_bg: #333;
-  --primary_bg300: #777;
-  --secondary_text: #333;
-  --secondary_bg: #fff;
-  --seconady_bg300: #AAA;
+label{
+  font-weight: 700;
+}
 
-  --primary_action_bg: #2b8251;
-  --primary_action_tx: #fff;
-  --secondary_action_bg: #2b5c82;
-  --secondary_action_txt: #fff;
+input{
+  font-size: 1rem;
+  padding:0.75rem 0.5rem;
+  border: 1px solid var(--primary_bg300);
+}
 
-  --alert: #c21010;
-  --warning: #bb980d;
-  --info: #3236ae;
+input.width-full{
+  width:100%;
+}
 
+button{
+  background-color: var(--primary_bg300);
+  color: var(--primary_text);
+  border: solid 2px var(--primary_bg300);
+  padding: 0.75rem;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+button:hover{
+  background-color: var();
+  box-shadow: 1px 1px 3px var(--primary_bg);
+}
+
+button.primary{
+  background-color: var(--primary_action_bg);
+  color: var(--primary_action_tx);
+}
+
+button.primary:hover{
+   box-shadow: 1px 1px 3px var(--primary_action_bg);
 }

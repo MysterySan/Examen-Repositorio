@@ -2,65 +2,79 @@
 
 namespace Utilities;
 
-use Dao\Security\Security as DaoSecurity;
-class Security {
-    private function __construct()
+class Site
+{
+    public static function configure()
     {
-        
+        $donenv = new \Utilities\DotEnv("parameters.env");
+        \Utilities\Context::setArrayToContext($donenv->load());
+        date_default_timezone_set(\Utilities\Context::getContextByKey("TIMEZONE"));
+        \Utilities\Context::setContext('CURRENT_YEAR', date("Y"));
     }
-    private function __clone()
+    public static function getPageRequest()
     {
-        
-    }
-    public static function logout()
-    {
-        unset($_SESSION["login"]);
-    }
-    public static function login($userId, $userName, $userEmail)
-    {
-        $_SESSION["login"] = array(
-            "isLogged" => true,
-            "userId" => $userId,
-            "userName" => $userName,
-            "userEmail" => $userEmail
-        );
-    }
-    public static function isLogged():bool
-    {
-        return isset($_SESSION["login"]) && $_SESSION["login"]["isLogged"];
-    }
-    public static function getUser()
-    {
-        if (isset($_SESSION["login"])) {
-            return $_SESSION["login"];
+        $pageRequest = Context::getContextByKey("PUBLIC_DEFAULT_CONTROLLER");
+        if (\Utilities\Security::isLogged()) {
+            $pageRequest = Context::getContextByKey("PRIVATE_DEFAULT_CONTROLLER");
         }
-        return false;
-    }
-    public static function getUserId()
-    {
-        if (isset($_SESSION["login"])) {
-            return $_SESSION["login"]["userId"];
+        if (isset($_GET["page"])) {
+            $pageRequest = str_replace(array("_", "-", "."), "\\", $_GET["page"]);
         }
-        return 0;
+        Context::setArrayToContext($_GET);
+        Context::setContext("request_uri", $_SERVER["REQUEST_URI"]);
+        return "Controllers\\" . $pageRequest;
+        //  \\Controllers\\rpts\\reportusers 
     }
-    public static function isAuthorized($userId, $function, $type = 'FNC'):bool
+    public static function redirectTo($url)
     {
-        if (\Utilities\Context::getContextByKey("DEVELOPMENT") == "1") {
-            $functionInDb = DaoSecurity::getFeature($function);
-            if (!$functionInDb) {
-                DaoSecurity::addNewFeature($function, $function, "ACT", $type);
-            }
+        if (Context::getContextByKey("USE_URLREWRITE") == "1") {
+            header("Location:" . \Views\Renderer::rewriteUrl($url));
+        } else {
+            header("Location:" . $url);
         }
-        return DaoSecurity::getFeatureByUsuario($userId, $function);
+
+        die();
     }
-    public static function isInRol($userId, $rol):bool
+    public static function redirectToWithMsg($url, $msg)
     {
-        if (\Utilities\Context::getContextByKey("DEVELOPMENT") == "1") {
-            $rolInDb = DaoSecurity::getRol($rol);
-            if (!$rolInDb) {
-                DaoSecurity::addNewRol($rol, $rol, "ACT");
-            }
+        echo '<script>alert("' . $msg . '");';
+        echo ' window.location.assign("' . $url . '");</script>';
+        die();
+    }
+    public static function addLink($href)
+    {
+        $tmpLinks = \Utilities\Context::getContextByKey("SiteLinks");
+        if ($tmpLinks === "") {
+            $tmpLinks = array($href);
+        } else {
+            $tmpLinks[] = $href;
         }
-        return DaoSecurity::isUsuarioInRol($userId, $rol);
+        \Utilities\Context::setContext("SiteLinks", $tmpLinks);
+    }
+    public static function addBeginScript($src)
+    {
+        $tmpSrcs = \Utilities\Context::getContextByKey("BeginScripts");
+        if ($tmpSrcs === "") {
+            $tmpSrcs = array($src);
+        } else {
+            $tmpSrcs[] = $src;
+        }
+        \Utilities\Context::setContext("BeginScripts", $tmpSrcs);
+    }
+    public static function addEndScript($src)
+    {
+        $tmpSrcs = \Utilities\Context::getContextByKey("EndScripts");
+        if ($tmpSrcs === "") {
+            $tmpSrcs = array($src);
+        } else {
+            $tmpSrcs[] = $src;
+        }
+        \Utilities\Context::setContext("EndScripts", $tmpSrcs);
+    }
+    public static function logError($ex, $errorCode)
+    {
+        error_log($ex);
+        \Utilities\Context::setContext("ERROR_CODE", $errorCode);
+        \Utilities\Context::setContext("ERROR_MSG", $ex);
     }
 }

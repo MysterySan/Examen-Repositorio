@@ -1,23 +1,56 @@
 <?php
+/**
+ * PHP Version 7.2
+ *
+ * @category Private
+ * @package  Controllers
+ * @author   Orlando J Betancourth <orlando.betancourth@gmail.com>
+ * @license  MIT http://
+ * @version  CVS:1.0.0
+ * @link     http://
+ */
 namespace Controllers;
 
-class NoAuth extends PublicController
+/**
+ * Private Access Controller Base Class
+ *
+ * @category Public
+ * @package  Controllers
+ * @author   Orlando J Betancourth <orlando.betancourth@gmail.com>
+ * @license  MIT http://
+ * @link     http://
+ */
+abstract class PrivateController extends PublicController
 {
-    public function run() :void
+    private function _isAuthorized()
     {
-        if (\Utilities\Security::isLogged()){
-            if (\Utilities\Context::getContextByKey("PRIVATE_LAYOUT") !== "") {
-                \Views\Renderer::render(
-                    "noauth",
-                    array(),
-                    \Utilities\Context::getContextByKey("PRIVATE_LAYOUT")
-                );
-            } else {
-                \Views\Renderer::render("noauth", array());
-            }
-        } else {
-            \Views\Renderer::render("noauth", array());
+        $isAuthorized = \Utilities\Security::isAuthorized(
+            \Utilities\Security::getUserId(),
+            $this->name,
+            'CTR'
+        );
+        if (!$isAuthorized){
+            throw new PrivateNoAuthException();
         }
     }
+    private function _isAuthenticated()
+    {
+        if (!\Utilities\Security::isLogged()){
+            throw new PrivateNoLoggedException();
+        }
+    }
+    protected function isFeatureAutorized($feature) :bool
+    {
+        return \Utilities\Security::isAuthorized(
+            \Utilities\Security::getUserId(),
+            $feature
+        );
+    }
+    public function __construct()
+    {
+        parent::__construct();
+        $this->_isAuthenticated();
+        $this->_isAuthorized();
+
+    }
 }
-?>

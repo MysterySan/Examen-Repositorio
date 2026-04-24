@@ -1,53 +1,51 @@
 <?php
 
 namespace Utilities;
-
-class Context
+class DotEnv
 {
-    static $_context = array();
-    public static function getContext()
+    /**
+     * The directory where the .env file can be located.
+     *
+     * @var string
+     */
+    protected $path;
+
+
+    public function __construct(string $path)
     {
-        return self::$_context;
-    }
-    public static function setContext($key, $value, $saveToSession = false)
-    {
-        self::$_context[$key] = $value;
-        if ($saveToSession) {
-            $_SESSION[$key] = $value;
+        if(!file_exists($path)) {
+            throw new \InvalidArgumentException(sprintf('%s does not exist', $path));
         }
-    }
-    public static function getContextByKey($key)
-    {
-        $value = "";
-        if (isset(self::$_context[$key])) {
-            $value = self::$_context[$key];
-        } else {
-            if (isset($_SESSION[$key])) {
-                $value = $_SESSION[$key];
-            }
-        }
-        return $value;
-    }
-    public static function setArrayToContext(array $contextValues, $saveToSession = false)
-    {
-        foreach ($contextValues as $name => $value) {
-            self::$_context[$name] = $value;
-            if ($saveToSession) {
-                $_SESSION[$name] = $value;
-            }
-        }
-    }
-    public static function removeContextByKey($key)
-    {
-        if (isset(self::$_context[$key])) {
-            unset(self::$_context[$key]);
-        }
-        if (isset($_SESSION[$key])) {
-            unset($_SESSION[$key]);
-        }
+        $this->path = $path;
     }
 
-    private function __construct()
+    public function load() :array
     {
+        $returnEnv = array();
+        if (!is_readable($this->path)) {
+            throw new \RuntimeException(sprintf('%s file is not readable', $this->path));
+        }
+
+        $lines = file($this->path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        foreach ($lines as $line) {
+
+            if (strpos(trim($line), '#') === 0) {
+                continue;
+            }
+
+            list($name, $value) = explode('=', $line, 2);
+            $name = trim($name);
+            $value = trim($value);
+
+            if (!array_key_exists($name, $_SERVER) && !array_key_exists($name, $_ENV)) {
+                putenv(sprintf('%s=%s', $name, $value));
+                $_ENV[$name] = $value;
+                $_SERVER[$name] = $value;
+            }
+            $returnEnv[$name] = $value;
+        }
+        return $returnEnv;
     }
 }
+
+?>

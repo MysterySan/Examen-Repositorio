@@ -1,44 +1,36 @@
-<?php
+CREATE TABLE
+    `products` (
+        `productId` int(11) NOT NULL AUTO_INCREMENT,
+        `productName` varchar(255) NOT NULL,
+        `productDescription` text NOT NULL,
+        `productPrice` decimal(10, 2) NOT NULL,
+        `productImgUrl` varchar(255) NOT NULL,
+        `productStock` int(11) NOT NULL DEFAULT 0,
+        `productStatus` char(3) NOT NULL,
+        PRIMARY KEY (`productId`)
+    ) ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = utf8mb4;
 
-/**
- * PHP Version 7.2
- *
- * @category Router
- * @package  SimplePHPOOPMvc
- * @author   Orlando J Betancourth <orlando.betancourth@gmail.com>
- * @license  MIT http://
- * @version  CVS:1.0.0
- * @link     http://
- */
+CREATE TABLE
+    `carretilla` (
+        `usercod` BIGINT(10) NOT NULL,
+        `productId` int(11) NOT NULL,
+        `crrctd` INT(5) NOT NULL,
+        `crrprc` DECIMAL(12, 2) NOT NULL,
+        `crrfching` DATETIME NOT NULL,
+        PRIMARY KEY (`usercod`, `productId`),
+        INDEX `productId_idx` (`productId` ASC),
+        CONSTRAINT `carretilla_user_key` FOREIGN KEY (`usercod`) REFERENCES `usuario` (`usercod`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+        CONSTRAINT `carretilla_prd_key` FOREIGN KEY (`productId`) REFERENCES `products` (`productId`) ON DELETE NO ACTION ON UPDATE NO ACTION
+    );
 
-use Utilities\Context;
-use Utilities\Site;
-
-require __DIR__ . '/vendor/autoload.php';
-session_start();
-
-try {
-    Site::configure();
-    $pageRequest = Site::getPageRequest();
-    $instance = new $pageRequest();
-    $instance->run();
-    die();
-} catch (\Controllers\PrivateNoAuthException $ex) {
-    $instance = new \Controllers\NoAuth();
-    $instance->run();
-    die();
-} catch (\Controllers\PrivateNoLoggedException $ex) {
-    $redirTo = urlencode(Context::getContextByKey("request_uri"));
-    Site::redirectTo("index.php?page=sec.login&redirto=" . $redirTo);
-    die();
-} catch (Exception $ex) {
-    Site::logError($ex, 500);
-    $instance = new \Controllers\Error();
-    $instance->run();
-    die();
-} catch (Error $ex) {
-    Site::logError($ex, 500);
-    $instance = new \Controllers\Error();
-    $instance->run();
-    die();
-}
+CREATE TABLE
+    `carretillaanon` (
+        `anoncod` varchar(128) NOT NULL,
+        `productId` bigint(18) NOT NULL,
+        `crrctd` int(5) NOT NULL,
+        `crrprc` decimal(12, 2) NOT NULL,
+        `crrfching` datetime NOT NULL,
+        PRIMARY KEY (`anoncod`, `productId`),
+        KEY `productId_idx` (`productId`),
+        CONSTRAINT `carretillaanon_prd_key` FOREIGN KEY (`productId`) REFERENCES `products` (`productId`) ON DELETE NO ACTION ON UPDATE NO ACTION
+    );
